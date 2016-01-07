@@ -1,0 +1,26 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "testing",
+  "main": "hello_world.js",
+  "dependencies": {
+    "socket.io": "*",
+		"express": "*",
+		"mongodb": "*",
+		"swig": "*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "chloé juneau-lefresne",
+  "license": "UNLICENSED"
+}

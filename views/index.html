@@ -1,0 +1,213 @@
+<!doctype html>  
+<html lang="en">  
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+				<script src="js/jquery-2.1.4.min.js"></script> 
+        <script src="js/three.min.js"></script>
+        <script src="js/keyboard_input.js"></script>
+<!-- 				<script src="js/scene_initializer.js"></script> -->
+				<script src="js/Keys.js"></script>
+				<script src="js/Player.js"></script>
+				<script></script>
+				<style>
+					body{
+						margin:0;
+					}
+					#renderer{
+						width:100%;
+					}
+				</style>
+    </head>
+    <body>
+        <h1>{{ test }}</h1>
+        <div id="future"></div>
+        <form id="form" id="chat_form">
+            <input id="chat_input" type="text">
+            <input type="submit" value="Send">
+        </form>
+				
+				<form id="new_char">
+            <input id="char_input" type="text">
+            <input type="submit" value="Send">
+        </form>
+				<div class="renderer"></div>
+<!-- 				<canvas id="webgl" width="800" height="600"></canvas> -->
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+   
+				<script>  
+					var socket = io.connect();
+					//Initialisation des variables
+					var localCharacter = null,
+							players = [];
+					
+					/* **********************
+						Initialisation de la scène
+					*********************** */
+					function init() {
+						// Maximise the canvas
+						//canvas.width = window.innerWidth;
+						//canvas.height = window.innerHeight;
+
+						// Initialise keyboard controls
+						keys = new Keys();
+						// Initialise scene
+						scene = new THREE.Scene();
+						/* ***********************
+							RENDERING
+						************************ */	
+						//Rendering the scene
+						camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+						renderer = new THREE.WebGLRenderer();
+						renderer.setSize( window.innerWidth, window.innerHeight );
+						document.body.appendChild( renderer.domElement );
+						//Creation of scene, camera, renderer, geometry, material an meshes
+						var geometry = new THREE.BoxGeometry( 10, 10, 10 );
+						var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+						//Setting camera position
+						camera.position.x = -5;
+						camera.position.y = 5;
+						camera.position.z = 5;
+						/* camera.lookAt( sphere ); */
+
+						/* ***********************
+							AXIS HELPER
+						************************ */	
+						axes = new THREE.AxisHelper( 1000 );
+						scene.add( axes );
+
+						//Grille
+						var size = 100;
+						var step = 1;
+
+						var gridHelper = new THREE.GridHelper( size, step );
+						scene.add( gridHelper );
+
+						/* ***********************
+							LIGHT
+						************************ */	
+						var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
+						scene.add( light );
+
+						/* ***********************
+							CHARACTER
+						************************ */	
+						function render() {
+							requestAnimationFrame( render );
+							renderer.render( scene, camera );
+							
+							/* ***********************
+								CONTROLS
+							************************ */
+							if(localCharacter != null){	
+								if(localCharacter.move(keys)){
+									socket.emit("move player", {id:localCharacter.id, x: localCharacter.position.x, y: localCharacter.position.y, z: localCharacter.position.z});
+								}
+							}
+						}
+						render();
+					};
+					
+					var setMoveHandlers = function() {
+						$(document).on("keydown", function(e){keys.onKeyDown(e)});
+						$(document).on("keyup", function(e){keys.onKeyUp(e)});
+					};
+					
+					function playerById(id) {
+						var i;
+						for (i = 0; i < players.length; i++) {
+							if (players[i].id == id)
+								return players[i];
+						};
+						return false;
+					};
+					
+					function onSocketConnected() {
+							console.log("Connected to socket server");
+					};
+
+					function onSocketDisconnect() {
+							console.log("Disconnected from socket server");
+					};
+
+					function onNewPlayer(data) {
+							console.log("New player connected: "+data.id);
+					};
+
+					function onMovePlayer(data) {
+						console.log("Player moved: "+data.id);
+						var movingP = playerById(data.id);
+						console.log("movingP");
+						console.log(movingP);
+						console.log(data);
+						movingP.position.setX(data.x);
+						movingP.position.setY(data.y);
+						movingP.position.setZ(data.z);
+					};
+
+					function onRemovePlayer(data) {
+						console.log("Player Removed: "+data.id);
+					};
+					
+					function createPlayer(data){
+						var player = new Player();
+						player.position.setX(data.x);
+						player.position.setY(data.y);
+						player.position.setZ(data.z);
+						scene.add( player ); 
+						player.name = data.name;
+						// Start listening for move events
+						setMoveHandlers();
+						player.id = data.id;
+						players.push(player);
+					};
+					
+					//Socket listeners
+					socket.on("connect", onSocketConnected);
+					socket.on("disconnect", onSocketDisconnect);
+					socket.on("new player", onNewPlayer);
+					socket.on("move player", onMovePlayer);
+					socket.on("remove player", onRemovePlayer);
+					socket.on('broad', function(data) {
+							$('#future').html(data);
+					 });
+
+					 $('#form').submit(function(e){
+							 e.preventDefault();
+							 var message = $('#chat_input').val();
+							 socket.emit('messages', message);
+					 });
+					 
+					 $('#new_char').submit(function(e){
+							e.preventDefault();
+							var nom = $('#char_input').val();
+							socket.emit('char_created', {name:$('#char_input').val(), x:0, y:0, z:-40});
+					 });
+					 
+					// New local player
+					socket.on('new_local_char', function(data){
+						//console.log("Local player"+data.id);
+						localCharacter = new Player();
+						localCharacter.position.setX(0);
+						localCharacter.position.setY(0);
+						localCharacter.position.setZ(-40);
+						scene.add( localCharacter ); 
+						localCharacter.name = data.name;
+						localCharacter.id = data.id;
+						// Start listening for move events
+						setMoveHandlers();
+						//Attacher la caméra au nouveau joueur
+						THREE.SceneUtils.attach( camera, scene, localCharacter );
+						camera.position.x = 0;
+						camera.position.y = 14;
+						camera.position.z = 10;
+						camera.lookAt( new THREE.Vector3(localCharacter.position) );
+						console.log(camera);
+					});
+					
+					// New outside player
+					socket.on('new_char', createPlayer);
+			$(document).ready(init);			
+		</script>		
+	 </body>
+</html>  
