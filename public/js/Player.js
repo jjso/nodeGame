@@ -1,20 +1,15 @@
-﻿var Player = function() {
+﻿var Player = function(scene) {
 	this.id = 0;
 	this.radius = 10;
 	this.segments = 16;
 	this.rings = 16;
-	this.geometry = new THREE.SphereGeometry(
-			this.radius,
-			this.segments,
-			this.rings);
-	THREE.Mesh.call( this, this.geometry, this.material );
+	this.scene = scene;
+	var geometry = new BABYLON.VertexData.CreateBox(1);
+	BABYLON.Mesh.call(this,"player",this.scene);
+	geometry.applyToMesh(this, false);
 	//Set character properties
 	this.type = 'Player';
 	this.speed = 1;
-	this.material = new THREE.MeshPhongMaterial(
-	{
-		color: 0xCC0000
-	});
 	//Rotating the character
 	this.rotation.x += 0.1;
 	this.rotation.y += 0.1;
@@ -43,7 +38,7 @@
 //change color 
 //this.material.color.setHex(0x1dff00);
 
-Player.prototype = Object.create( THREE.Mesh.prototype );
+Player.prototype = Object.create( BABYLON.Mesh.prototype );
 Player.prototype.constructor = Player;
 
 
