@@ -49,8 +49,8 @@
 			keys = new Keys();
 			// Initialise scene
 			scene = new BABYLON.Scene(engine);
-			console.log("scene1");
-			console.log(scene);
+			
+			var camera = new BABYLON.FollowCamera("camera1", new BABYLON.Vector3(75, window.innerWidth / window.innerHeight, 0.1), scene);
 			
 			/* **********************
 				Initialisation de la scène
@@ -66,7 +66,7 @@
 					scene.clearColor = new BABYLON.Color3(0, 1, 0);
 
 					// This creates and positions a free camera
-					var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(75, window.innerWidth / window.innerHeight, 0.1), scene);
+					
 
 					// This targets the camera to scene origin
 					camera.setTarget(BABYLON.Vector3.Zero());
@@ -97,64 +97,13 @@
 				  var scene = createScene();
 				  engine.runRenderLoop(function () {
 					if(localCharacter != null){	
+						//camera.setTarget(localCharacter.position);
 						if(localCharacter.move(keys)){
 							socket.emit("move player", {id:localCharacter.id, x: localCharacter.position.x, y: localCharacter.position.y, z: localCharacter.position.z});
 						}
 					}
 					scene.render();
 				  });
-				//Rendering the scene
-				//camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			/*	camera = new BABYLON.FreeCamera("camera1", 75, window.innerWidth / window.innerHeight, 0.1, scene);
-				camera.setTarget(BABYLON.Vector3.Zero()); */
-				// This attaches the camera to the canvas
-				//camera.attachControl(canvas, true);
-				// This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-				//var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-				//renderer = new THREE.WebGLRenderer();
-				//renderer.setSize( window.innerWidth, window.innerHeight );
-				//document.body.appendChild( renderer.domElement );
-				//Creation of scene, camera, renderer, geometry, material an meshes
-				//var geometry = new THREE.BoxGeometry( 10, 10, 10 );
-				//var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-
-				//Setting camera position
-				//camera.position.x = -5;
-				//camera.position.y = 5;
-				//camera.position.z = 5;
-
-				/* ***********************
-					AXIS HELPER
-				************************ */	
-				/* axes = new THREE.AxisHelper( 1000 );
-				scene.add( axes );
-
-				//Grille
-				var size = 100;
-				var step = 1;
-				var gridHelper = new THREE.GridHelper( size, step );
-				scene.add( gridHelper ); */
-
-				/* ***********************
-					LIGHT
-				************************ */	
-				//var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
-				//scene.add( light );
-
-				/* ***********************
-					RENDERING
-				************************ */	
-				/*function render() {
-					requestAnimationFrame( render );
-					renderer.render( scene, camera );
-					if(localCharacter != null){	
-						if(localCharacter.move(keys)){
-							socket.emit("move player", {id:localCharacter.id, x: localCharacter.position.x, y: localCharacter.position.y, z: localCharacter.position.z});
-						}
-					}
-				}
-				render();*/
-				  // Watch for browser/canvas resize events
 				  window.addEventListener("resize", function () {
 					engine.resize();
 				  });
@@ -194,9 +143,9 @@
 		console.log("movingP");
 		console.log(movingP);
 		console.log(data);
-		movingP.position.setX(data.x);
-		movingP.position.setY(data.y);
-		movingP.position.setZ(data.z);
+		movingP.position.x = data.x;
+		movingP.position.y = data.y;
+		movingP.position = data.z;
 	};
 
 	function onRemovePlayer(data) {
@@ -205,10 +154,10 @@
 	
 	function createPlayer(data, scene){
 		var player = new Player(scene);
-		player.position.setX(data.x);
-		player.position.setY(data.y);
-		player.position.setZ(data.z);
-		scene.add( player ); 
+		player.position.x = data.x;
+		player.position.y = data.y;
+		player.position.z = data.z;
+		//scene.add( player ); 
 		player.name = data.name;
 		// Start listening for move events
 		setMoveHandlers();
@@ -242,20 +191,17 @@
 	socket.on('new_local_char', function(data){
 		//console.log("Local player"+data.id);
 		localCharacter = new Player(scene);
-		localCharacter.position.setX(0);
-		localCharacter.position.setY(0);
-		localCharacter.position.setZ(-40);
-		scene.add( localCharacter ); 
+		camera.target = localCharacter;
+		localCharacter.position.x = 0;
+		localCharacter.position.y = 0;
+		localCharacter.position.z = -40;
+		// scene.add( localCharacter ); 
 		localCharacter.name = data.name;
 		localCharacter.id = data.id;
 		// Start listening for move events
 		setMoveHandlers();
 		//Attacher la caméra au nouveau joueur
-		THREE.SceneUtils.attach( camera, scene, localCharacter );
-		camera.position.x = 0;
-		camera.position.y = 14;
-		camera.position.z = 10;
-		camera.lookAt( new THREE.Vector3(localCharacter.position) );
+		//BABYLON.activeCamera.attachControl( localCharacter, noPreventDefault );
 		console.log(camera);
 	});
 	

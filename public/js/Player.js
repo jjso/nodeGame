@@ -25,11 +25,11 @@
 			updated = true;
 		}
 		if(keys.left){
-			this.position.x -= this.speed;
+			this.position.x += this.speed;
 			updated = true;
 		}
 		if(keys.right){
-			this.position.x += this.speed;
+			this.position.x -= this.speed;
 			updated = true;
 		}
 		return updated;
