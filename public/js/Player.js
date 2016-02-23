@@ -18,6 +18,7 @@
 	//Rotating the character
 	this.rotation.x += 0.1;
 	this.rotation.y += 0.1;
+	//Moving the character based on Keys.js
 	this.move = function(keys){
 		var updated = false;
 		if(keys.up){
@@ -44,9 +45,6 @@
 
 Player.prototype = Object.create( THREE.Mesh.prototype );
 Player.prototype.constructor = Player;
-/* Player.prototype.getMesh = function() {
-   return this;
-} */
 
 
 

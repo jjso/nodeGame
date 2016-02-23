@@ -4,10 +4,11 @@
   "description": "testing",
   "main": "hello_world.js",
   "dependencies": {
+    "express": "*",
+    "mongodb": "*",
+    "monk": "^1.0.1",
     "socket.io": "*",
-		"express": "*",
-		"mongodb": "*",
-		"swig": "*"
+    "swig": "*"
   },
   "devDependencies": {},
   "scripts": {

@@ -7,6 +7,11 @@
 	Player = require("./Player").Player,
 	players;
 	
+// Database connection
+var mongo = require('mongodb');
+var monk = require('monk');
+var db = monk('localhost:27017/nodegame');
+	
 function init(){
 	players = [];
 	setEventHandlers();
@@ -17,10 +22,11 @@ var setEventHandlers = function() {
     io.on("connection", onSocketConnection);
 };
 
-// Send client html.
-/* app.get('/', function(req, res) {
-    res.sendfile(__dirname + '/3d.html')
-})  */
+// Rendre la base de données accessible au routeur
+app.use(function(req,res,next){
+    req.db = db;
+    next();
+});
 
 //Templating system - SWIG  http://paularmstrong.github.io/swig/
 app.engine('html', swig.renderFile);
@@ -28,21 +34,28 @@ app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/public'));
 app.get('/', function(req, res, next) {  
-    //res.sendFile(__dirname + '/index.html');
-		res.render('index', { test: 'ALLO' });
+	//Accéder à la base de données
+	var db = req.db;
+	var collection = db.get('usercollection');
+	console.log("collection")
+	var user_data = collection.find({},{},function(e,docs){
+        console.log(e);
+        console.log(docs);
+	})
+	res.render('index', { /* template locals context */ });
 });
+
 app.post('/', function (req, res) {
   res.send('Got a POST request');
 	console.log("got a post request")
 });
 
 
-
 onSocketConnection = function (client) {  
 	console.log('Client connected...');
 	util.log("New player has connected: "+client.id);
 	client.on('join', function(data) {
-			console.log(data);
+		/* console.log(data); */
 	});
 	client.on("disconnect", onClientDisconnect);
 	//client.on("new player", onNewPlayer);
@@ -63,14 +76,13 @@ function playerById(id) {
 	};
 	return false;
 };
-
+/* ********************************
+	Création et broadcast d'un nouveau joueur
+********************************* */
 onNewPlayer = function(data) {
-/* 	util.log("data.id");
-	util.log(data.id);
-	util.log(this.id); */
-	io.emit('new_local_char', {name:data, id:this.id});
+	this.emit('new_local_char', {name:data, id:this.id});
 	this.broadcast.emit('new_char', {name:data, id:this.id, x:0, y:0, z:-40});
-	var newPlayer = new Player(data.x, data.y, data.z, this.id);
+	var newPlayer = new Player(data.x, data.y, data.z, this.id, data.name);
 	//newPlayer.id = data.id;
 	this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY(), z: newPlayer.getZ()});
 	var i, existingPlayer;
@@ -83,6 +95,9 @@ onNewPlayer = function(data) {
 	util.log(players);
 };
 
+/* ********************************
+	Déplacement du joueur local
+********************************* */
 onMovePlayer = function(data) {
 	var movePlayer = playerById(data.id);
 
@@ -90,16 +105,16 @@ onMovePlayer = function(data) {
 		console.log("Player not found: "+data.id);
 		return;
 	};
-	
-/* 	util.log("data.x");
-	util.log(data.x); */
+
 	movePlayer.setX(data.x);
 	movePlayer.setY(data.y);
 	movePlayer.setZ(data.z);
-	util.log(movePlayer.getX());
 	this.broadcast.emit("move player", {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY(), z: movePlayer.getZ()});
 };
 
+/* ********************************
+	Suppression du joueur
+********************************* */
 onRemovePlayer = function(data){
 	var removePlayer = playerById(this.id);
 
@@ -112,6 +127,9 @@ onRemovePlayer = function(data){
 	this.broadcast.emit("remove player", {id: this.id});
 }
 
+/* ********************************
+	Déconnexion du joueur
+********************************* */
 onClientDisconnect = function() {
     util.log("Player has disconnected: "+this.id);
 };

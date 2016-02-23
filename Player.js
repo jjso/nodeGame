@@ -1,9 +1,13 @@
-﻿var Player = function(startX, startY, startZ, id, name) {
+﻿/* **********************************
+	Initialisation et déplacements du joueur
+********************************** */
+
+var Player = function(startX, startY, startZ, id, name) {
     var x = startX,
         y = startY,
-				z = startZ,
+		z = startZ,
         id = id,
-				name = name;
+		name = name;
     
     var getX = function() {
         return x;
@@ -36,7 +40,7 @@
         setX: setX,
         setY: setY,
         setZ: setZ,
-				name: name,
+		name: name,
         id: id
     }
 };
