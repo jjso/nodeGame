@@ -115,16 +115,7 @@
 		$(document).on("keydown", function(e){keys.onKeyDown(e)});
 		$(document).on("keyup", function(e){keys.onKeyUp(e)});
 	};
-	
-	function playerById(id) {
-		var i;
-		for (i = 0; i < players.length; i++) {
-			if (players[i].id == id)
-				return players[i];
-		};
-		return false;
-	};
-	
+		
 	function onSocketConnected() {
 			console.log("Connected to socket server");
 	};
@@ -136,6 +127,15 @@
 	function onNewPlayer(data) {
 			console.log("New player connected: "+data.id);
 	};
+	
+	function playerById(id) {
+		var i;
+		for (i = 0; i < players.length; i++) {
+			if (players[i].id == id)
+				return players[i];
+		};
+		return false;
+	};
 
 	function onMovePlayer(data) {
 		console.log("Player moved: "+data.id);
@@ -145,7 +145,7 @@
 		console.log(data);
 		movingP.position.x = data.x;
 		movingP.position.y = data.y;
-		movingP.position = data.z;
+		movingP.position.z = data.z;
 	};
 
 	function onRemovePlayer(data) {
