@@ -1,14 +1,7 @@
 <!doctype html>  
 <html lang="en">  
     <head>
-		<style>
-			body{
-				margin:0;
-			}
-			#renderer{
-				width:100%;
-			}
-		</style>
+		<link rel="stylesheet" href="css/style.css">
     </head>
     <body>
         <h1>Hello World!</h1>
@@ -22,17 +15,19 @@
             <input id="char_input" type="text">
             <input type="submit" value="Send">
         </form>
-		<div class="renderer"></div>
-		<canvas id="webgl" width="800" height="600"></canvas> 
+		<!-- <div class="renderer"></div> --> 
+		<div class="container">
+			<canvas id="webgl" width="800" height="600"></canvas> 
+		</div>
         <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="js/jquery-2.1.4.min.js"></script> 
-		<script src="http://www.babylonjs.com/hand.minified-1.2.js"></script>
-        <script src="http://www.babylonjs.com/cannon.js"></script>
-        <script src="http://www.babylonjs.com/oimo.js"></script>
-        <script src="http://www.babylonjs.com/babylon.js"></script>
+		<script src="js/babylon.2.3.js"></script>
+		<script src="js/babylon.2.3.max.js"></script>
+		<script src="js/babylon.2.3.noworker.js"></script>
 		<script src="js/Keys.js"></script>
 		<script src="js/Player.js"></script>
 		<script src="js/Application.js"></script>
+		<script src="js/canvas_resize.js"></script>
 	 </body>
 </html>  

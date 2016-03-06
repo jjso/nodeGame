@@ -10,7 +10,9 @@
     "socket.io": "*",
     "swig": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
   "scripts": {
     "test": "test",
     "start": "node server.js"
