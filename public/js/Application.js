@@ -57,6 +57,21 @@ function init(scene) {
 
 		// Let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
 		var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
+		
+		// Skybox
+		var skybox = BABYLON.Mesh.CreateBox("skyBox", 2000.0, scene);
+		var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+		skyboxMaterial.backFaceCulling = false;
+		skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("images/skybox/city", scene);
+		skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+		skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+		skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+		skybox.material = skyboxMaterial;
+		
+		var light0 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
+		light0.diffuse = new BABYLON.Color3(1, 1, 1);
+		light0.specular = new BABYLON.Color3(1, 1, 1);
+		light0.groundColor = new BABYLON.Color3(0, 0, 0);
 
 		// Leave this function
 		return scene;
@@ -158,7 +173,6 @@ function init(scene) {
 	 
 	// New local player
 	socket.on('new_local_char', function(data){
-		//console.log("Local player"+data.id);
 		localCharacter = new Player(scene);
 		camera.target = localCharacter;
 		localCharacter.position.x = 0;
@@ -182,4 +196,7 @@ function init(scene) {
 	$(document).ready(function(e) { 
 		init(scene);
 	});	
+	
+	//Set game vars
+	G.localCharacter = localCharacter;
 }(GAME))
