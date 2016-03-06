@@ -17,19 +17,19 @@
 	this.move = function(keys){
 		var updated = false;
 		if(keys.up){
-			this.position.z -= this.speed;
+			this.position.x -= this.speed;
 			updated = true;
 		}
 		if(keys.down){
-			this.position.z += this.speed;
-			updated = true;
-		}
-		if(keys.left){
 			this.position.x += this.speed;
 			updated = true;
 		}
+		if(keys.left){
+			this.position.z -= this.speed;
+			updated = true;
+		}
 		if(keys.right){
-			this.position.x -= this.speed;
+			this.position.z += this.speed;
 			updated = true;
 		}
 		return updated;

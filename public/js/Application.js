@@ -19,7 +19,7 @@ var keys = new Keys();
 // Initialise scene
 var scene = new BABYLON.Scene(engine);
 
-var camera = new BABYLON.FollowCamera("camera1", new BABYLON.Vector3(75, window.innerWidth / window.innerHeight, 0.1), scene);
+var camera = new BABYLON.ArcRotateCamera("camera1", 13,  Math.PI/4, 20, new BABYLON.Vector3(75, window.innerWidth / window.innerHeight, 0.1), scene);
 
 /* **********************
 	Initialisation de la scène
@@ -33,9 +33,6 @@ function init(scene) {
 
 		// Change the scene background color to green.
 		scene.clearColor = new BABYLON.Color3(0, 1, 0);
-
-		// This creates and positions a free camera
-		
 
 		// This targets the camera to scene origin
 		camera.setTarget(BABYLON.Vector3.Zero());
@@ -122,11 +119,7 @@ function init(scene) {
 	};
 
 	function onMovePlayer(data) {
-		console.log("Player moved: "+data.id);
 		var movingP = playerById(data.id);
-		console.log("movingP");
-		console.log(movingP);
-		console.log(data);
 		movingP.position.x = data.x;
 		movingP.position.y = data.y;
 		movingP.position.z = data.z;
@@ -173,8 +166,12 @@ function init(scene) {
 	 
 	// New local player
 	socket.on('new_local_char', function(data){
+		//Créer le personnage
 		localCharacter = new Player(scene);
+		//Attacher le personnage à la caméra
 		camera.target = localCharacter;
+		camera.lowerAlphaLimit  = -0.3;
+		camera.upperAlphaLimit = 0.3;
 		localCharacter.position.x = 0;
 		localCharacter.position.y = 0;
 		localCharacter.position.z = -40;
@@ -183,8 +180,6 @@ function init(scene) {
 		localCharacter.id = data.id;
 		// Start listening for move events
 		setMoveHandlers();
-		//Attacher la caméra au nouveau joueur
-		console.log(camera);
 	});
 
 	// New outside player
