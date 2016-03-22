@@ -162,6 +162,7 @@ function init(scene) {
 			e.preventDefault();
 			var nom = $('#char_input').val();
 			socket.emit('char_created', {name:$('#char_input').val(), x:0, y:0, z:-40});
+			socket.emit('new_local', {name:$('#char_input').val(), x:0, y:0, z:-40});
 	 });
 	 
 	// New local player

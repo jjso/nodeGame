@@ -3,7 +3,7 @@
     var c = $('#webgl');
     var ct = c.get(0).getContext('3d');
     var container = $(c).parent();
-
+	
     //Run function when browser resizes
     $(window).resize( respondCanvas );
 

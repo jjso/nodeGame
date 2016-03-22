@@ -60,7 +60,8 @@ onSocketConnection = function (client) {
 	client.on("disconnect", onClientDisconnect);
 	//client.on("new player", onNewPlayer);
 	client.on("move player", onMovePlayer);
-	client.on('char_created', onNewPlayer)
+	client.on('char_created', onNewPlayer);
+	client.on('new_local', showPlayers);
 	//Chat 
 	client.on('messages', function(data) {
 		 client.emit('broad', data);
@@ -80,8 +81,10 @@ function playerById(id) {
 	Création et broadcast d'un nouveau joueur
 ********************************* */
 onNewPlayer = function(data) {
-	this.emit('new_local_char', {name:data, id:this.id});
-	this.broadcast.emit('new_char', {name:data, id:this.id, x:0, y:0, z:-40});
+	var collection = db.get('usercollection');
+	collection.insert({name:data.name, id:this.id, x:0, y:0, z:-40});
+	this.emit('new_local_char', {name:data.name, id:this.id});
+	this.broadcast.emit('new_char', {name:data.name, id:this.id, x:0, y:0, z:-40});
 	var newPlayer = new Player(data.x, data.y, data.z, this.id, data.name);
 	//newPlayer.id = data.id;
 	this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY(), z: newPlayer.getZ()});
@@ -93,14 +96,40 @@ onNewPlayer = function(data) {
 	players.push(newPlayer);
 	util.log("players");
 	util.log(players);
+
 };
+
+/* ********************************
+	Afficher les personnages déjà présents
+********************************* */
+
+showPlayers = function(data){
+	var collection = db.get('usercollection');
+	var ceci = this;
+	util.log(collection.find());
+	collection.find( {}, { stream: true } ).each(
+		function(e){
+			ceci.broadcast.emit('new_char', {name:e.name, id:e.id, x:e.x, y:e.y, z:-e.z});
+		}
+	)
+}
 
 /* ********************************
 	Déplacement du joueur local
 ********************************* */
 onMovePlayer = function(data) {
 	var movePlayer = playerById(data.id);
-
+	var collection = db.get('usercollection');
+	collection.update(
+		{ id: data.id },
+		{
+			id: data.id,
+			name: data.name,
+			x:data.x, 
+			y:data.y, 
+			z:data.z	
+		}
+	)
 	if (!movePlayer) {
 		console.log("Player not found: "+data.id);
 		return;
@@ -117,7 +146,7 @@ onMovePlayer = function(data) {
 ********************************* */
 onRemovePlayer = function(data){
 	var removePlayer = playerById(this.id);
-
+	
 	if (!removePlayer) {
 			util.log("Player not found: "+this.id);
 			return;
@@ -132,6 +161,8 @@ onRemovePlayer = function(data){
 ********************************* */
 onClientDisconnect = function() {
     util.log("Player has disconnected: "+this.id);
+	var collection = db.get('usercollection');
+	collection.remove({id: this.id});
 };
 
 init();
